@@ -1,0 +1,573 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--kertas:#E4E9EA;--kertas2:#F5F7F7;--kertas3:#D6DDDE;--tinta:#12222A;--tinta2:#5C6E76;--garis:#A9B6B9;
+--merah:#C8102E;--z-publik:#F0E0C0;--z-klinis:#C6E0DD;--z-penunjang:#D8D9EA;--z-servis:#D3D6D4;--z-sirk:#FBFCFC;
+--ok:#2F6B4F;--warn:#9A6B12;--bad:#A81D2E;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--kertas);color:var(--tinta);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.cond{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.sheet{max-width:1320px;margin:18px auto;background:var(--kertas2);border:1.5px solid var(--tinta);box-shadow:0 1px 0 var(--garis),0 14px 34px rgba(18,34,42,.13)}
+.sheet-inner{border:1px solid var(--garis);margin:7px}
+header.kop{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;padding:14px 18px 12px;border-bottom:1.5px solid var(--tinta)}
+.brand{display:flex;align-items:center;gap:11px}.tick{width:9px;height:34px;background:var(--merah)}
+.brand h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.015em;text-transform:uppercase}
+.brand p{margin:1px 0 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta2)}
+.kop-meta{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--tinta2);text-align:right}
+.body{display:grid;grid-template-columns:290px 1fr;min-height:580px}
+@media(max-width:900px){.body{grid-template-columns:1fr}}
+.panel{border-right:1.5px solid var(--tinta);padding:16px 16px 22px;background:var(--kertas3)}
+@media(max-width:900px){.panel{border-right:0;border-bottom:1.5px solid var(--tinta)}}
+.panel h2{font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 12px;color:var(--tinta2);border-bottom:1px solid var(--garis);padding-bottom:6px}
+.panel h2:not(:first-child){margin-top:22px}
+.f{margin-bottom:11px}
+.f label{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--tinta2);margin-bottom:3px;font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600}
+.f input,.f select{width:100%;padding:7px 9px;border:1px solid var(--tinta2);background:var(--kertas2);color:var(--tinta);font-family:"IBM Plex Mono",monospace;font-size:13px;border-radius:0}
+.f input:focus,.f select:focus{outline:2px solid var(--merah);outline-offset:-1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.seg{display:flex;border:1px solid var(--tinta2)}
+.seg button{flex:1;padding:7px 0;background:var(--kertas2);border:0;cursor:pointer;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tinta2)}
+.seg button+button{border-left:1px solid var(--tinta2)}
+.seg button[aria-pressed=true]{background:var(--tinta);color:var(--kertas2)}
+.hint{font-size:11px;color:var(--tinta2);margin-top:4px;line-height:1.35}
+.stage{display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;border-bottom:1.5px solid var(--tinta);background:var(--kertas3);flex-wrap:wrap}
+.tabs button{padding:10px 14px;background:none;border:0;border-right:1px solid var(--garis);cursor:pointer;font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--tinta2)}
+.tabs button[aria-selected=true]{background:var(--kertas2);color:var(--tinta);box-shadow:inset 0 -3px 0 var(--merah)}
+.view{padding:16px 18px 22px;flex:1;min-width:0}.view[hidden]{display:none}
+.floorbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.floorbar button{padding:5px 13px;border:1px solid var(--tinta2);background:var(--kertas2);cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--tinta2)}
+.floorbar button[aria-pressed=true]{background:var(--merah);border-color:var(--merah);color:#fff}
+svg.plan{width:100%;height:auto;display:block;background:var(--kertas2)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;padding-top:11px;border-top:1px solid var(--garis);font-size:11.5px;color:var(--tinta2);align-items:center}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:15px;height:11px;border:1px solid var(--tinta2)}
+.notes{margin-top:14px;display:grid;gap:7px}
+.note{display:flex;gap:9px;padding:8px 11px;font-size:12.5px;border-left:3px solid;background:var(--kertas2)}
+.note.ok{border-color:var(--ok)}.note.warn{border-color:var(--warn)}.note.bad{border-color:var(--bad)}
+.note b{font-family:"IBM Plex Sans Condensed",sans-serif;text-transform:uppercase;font-size:11px;letter-spacing:.08em;flex:0 0 62px;padding-top:1px}
+.note.ok b{color:var(--ok)}.note.warn b{color:var(--warn)}.note.bad b{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--garis);vertical-align:top}
+th{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--tinta2);border-bottom:1.5px solid var(--tinta)}
+td.num{font-family:"IBM Plex Mono",monospace;text-align:right;white-space:nowrap}
+tr.grp td{background:#E4E9EA;font-weight:600;font-family:"IBM Plex Sans Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:11.5px}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:1px 5px;border:1px solid var(--garis);color:var(--tinta2)}
+.tag.add{border-color:var(--merah);color:var(--merah)}
+#gl{width:100%;height:520px;background:linear-gradient(180deg,#DCE3E4,#EFF2F2);border:1px solid var(--garis);cursor:grab;touch-action:none}
+#gl:active{cursor:grabbing}
+.btn{display:inline-block;padding:9px 16px;background:var(--tinta);color:var(--kertas2);border:0;cursor:pointer;font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.09em;font-size:12px}
+.btn.alt{background:var(--merah)}.btn:hover{opacity:.88}
+footer{padding:11px 18px;border-top:1.5px solid var(--tinta);font-size:11px;color:var(--tinta2);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.chip{display:inline-block;width:13px;height:13px;border:1px solid var(--tinta2);vertical-align:-2px;margin-right:5px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="sheet"><div class="sheet-inner">
+<header class="kop">
+  <div class="brand"><div class="tick"></div><div>
+    <h1>Generator Denah Klinik Utama Gigi</h1>
+    <p>Medikids &middot; MHDC Group &middot; dikalibrasi dari DWG Cibinong &amp; Kalimalang</p></div></div>
+  <div class="kop-meta" id="kopMeta">—</div>
+</header>
+
+<div class="body">
+  <div class="panel">
+    <h2>Preset</h2>
+    <div class="f"><select id="in-preset">
+      <option value="cib">Benchmark Cibinong — 4,42 × 18,0 m / 3 lt</option>
+      <option value="klm">Benchmark Kalimalang — 8,0 × 16,0 m / 3 lt + lift</option>
+      <option value="std">Ruko standar 4,5 × 15 m / 3 lt</option>
+      <option value="cst">Custom</option></select></div>
+
+    <h2>Data Ruko</h2>
+    <div class="row2">
+      <div class="f"><label>Lebar as-as (m)</label><input id="in-w" type="number" value="4.42" step="0.01" min="3" max="16"></div>
+      <div class="f"><label>Panjang (m)</label><input id="in-d" type="number" value="18" step="0.1" min="8" max="30"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Tebal dinding (m)</label><input id="in-t" type="number" value="0.075" step="0.005" min="0.05" max="0.25"></div>
+      <div class="f"><label>Jumlah lantai</label><select id="in-n"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>FtF lt.1→2 (m)</label><input id="in-h1" type="number" value="4.25" step="0.05" min="2.8" max="6"></div>
+      <div class="f"><label>FtF lt. atas (m)</label><input id="in-h2" type="number" value="3.75" step="0.05" min="2.8" max="6"></div>
+    </div>
+    <div class="f"><label>Sisi tangga</label>
+      <div class="seg" id="seg-sisi"><button data-v="kiri" aria-pressed="true">Kiri</button><button data-v="kanan" aria-pressed="false">Kanan</button></div></div>
+    <div class="f"><label>Sirkulasi vertikal</label>
+      <select id="in-lift"><option value="0">Tangga saja</option><option value="1">Tangga + lift (8,1 m²)</option></select></div>
+
+    <h2>Program Ruang</h2>
+    <div class="row2">
+      <div class="f"><label>Jumlah DU</label><input id="in-du" type="number" value="4" step="1" min="1" max="12"></div>
+      <div class="f"><label>Kursi tunggu</label><input id="in-kursi" type="number" value="14" step="1" min="4" max="60"></div>
+    </div>
+    <div class="f"><label>Lebar koridor (m)</label><input id="in-kor" type="number" value="1.27" step="0.01" min="0.8" max="2.5">
+      <p class="hint" id="hintKor"></p></div>
+    <div class="f"><label>Rontgen</label><select id="in-rtg">
+      <option value="intra">Intraoral — 2,27 × 3,00 m</option>
+      <option value="pano">Panoramik / CBCT — 3,00 × 3,00 m</option>
+      <option value="none">Tidak ada</option></select></div>
+    <div class="f"><label>R. Tindakan / Bedah Mulut</label><select id="in-bedah">
+      <option value="1">Ada — 16 m²</option><option value="0">Tidak ada</option></select></div>
+    <div class="f"><label>Myobrace / Orthowall</label><select id="in-myo">
+      <option value="1">Ada (seperti Kalimalang)</option><option value="0" selected>Tidak ada</option></select></div>
+
+    <h2>Kop Gambar</h2>
+    <div class="f"><label>Kode cabang</label><select id="in-cab"></select></div>
+    <div class="row2">
+      <div class="f"><label>Skala</label><select id="in-skala"><option>1:60</option><option>1:50</option><option>1:100</option></select></div>
+      <div class="f"><label>No. lembar</label><input id="in-lembar" value="LP.1"></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true"  data-t="v-plan">Denah 2D</button>
+      <button role="tab" aria-selected="false" data-t="v-3d">Model 3D</button>
+      <button role="tab" aria-selected="false" data-t="v-prog">Rekap Ruang</button>
+      <button role="tab" aria-selected="false" data-t="v-bench">Benchmark</button>
+      <button role="tab" aria-selected="false" data-t="v-std">Standar Gambar</button>
+      <button role="tab" aria-selected="false" data-t="v-cek">Ceklis Regulasi</button>
+      <button role="tab" aria-selected="false" data-t="v-mep">Daya &amp; Utilitas</button>
+    </div>
+
+    <div class="view" id="v-plan">
+      <div class="floorbar" id="floorbar"></div>
+      <svg class="plan" id="plan" viewBox="0 0 1050 720" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--z-publik)"></i>Publik</span>
+        <span><i class="sw" style="background:var(--z-klinis)"></i>Klinis</span>
+        <span><i class="sw" style="background:var(--z-penunjang)"></i>Penunjang</span>
+        <span><i class="sw" style="background:var(--z-servis)"></i>Servis</span>
+        <span><i class="sw" style="background:var(--z-sirk)"></i>Sirkulasi</span>
+        <span style="margin-left:auto">
+          <button class="btn alt" id="btn-dxf">Unduh DXF</button>
+          <button class="btn" id="btn-svg">Unduh SVG</button></span>
+      </div>
+      <div class="notes" id="notes"></div>
+    </div>
+
+    <div class="view" id="v-3d" hidden>
+      <div class="floorbar">
+        <button id="btn-explode" aria-pressed="false">Pisahkan lantai</button>
+        <button id="btn-atap" aria-pressed="true">Tampilkan dinding</button>
+        <span class="hint" style="margin-left:8px">Seret untuk memutar &middot; gulir untuk zoom</span>
+      </div>
+      <div id="gl"></div>
+    </div>
+
+    <div class="view" id="v-prog"  hidden><div id="progTbl"></div></div>
+    <div class="view" id="v-bench" hidden><div id="benchTbl"></div></div>
+    <div class="view" id="v-std"   hidden><div id="stdTbl"></div></div>
+    <div class="view" id="v-cek"   hidden><div id="cekTbl"></div></div>
+    <div class="view" id="v-mep"   hidden><div id="mepTbl"></div></div>
+  </div>
+</div>
+<footer>
+  <span>Digambar: Akmal (Drafter) &nbsp;·&nbsp; Diperiksa: Akbar Pratama (GA Manager) &nbsp;·&nbsp; MHDC Group</span>
+  <span class="mono">Base drawing otomatis — wajib dioverlay dengan as-built kolom, void &amp; kusen eksisting.</span>
+</footer>
+</div></div>
+
+<script>
+const CABANG=["HQ","BNI","BG","STR","KC","GT","KMG","BKS","BNT","BSD","DPK","BGR","CKP","PI","SWG","KLM","BDG","CLG","KBJ","PDG","CBN","PLB","SBY","JGC","CBB","LB","KRW","CPD","SMR","MKS","GWT","KWC","RWM","RMP","STNT","PCM","CKR","MLG","PKB","RSBL"];
+const NEGARA=["AFRICA","TURKIYE","JAPAN","LONDON","AMERICA","KOREA","EGYPT","ITALY","BRAZIL","INDIA","AUSTRALIA","CHINA"];
+const ZONA={publik:'var(--z-publik)',klinis:'var(--z-klinis)',penunjang:'var(--z-penunjang)',servis:'var(--z-servis)',sirkulasi:'var(--z-sirk)'};
+const ZONA3D={publik:0xE8D3A8,klinis:0xA9CFCA,penunjang:0xC3C5DE,servis:0xC0C4C1,sirkulasi:0xF2F5F5};
+// layer mengikuti DWG Cibinong
+const LAY={dinding:'Dinding',kolom:'Kolom',partisi:'Partisi',kusen:'Pintu dan jendela',furn:'FURNITURE',teks:'Teks 1',dim:'DIMENSI',elek:'Elektrikal',kop:'KOP 0|Kop'};
+
+const PRESET={
+ cib:{w:4.42,d:18,t:0.075,n:3,h1:4.25,h2:3.75,kor:1.27,du:4,kursi:14,lift:0,myo:0,cab:'CBN',skala:'1:60'},
+ klm:{w:8.0,d:16,t:0.10,n:3,h1:4.25,h2:3.75,kor:1.40,du:5,kursi:20,lift:1,myo:1,cab:'KLM',skala:'1:50'},
+ std:{w:4.5,d:15,t:0.10,n:3,h1:3.80,h2:3.50,kor:1.27,du:4,kursi:14,lift:0,myo:0,cab:'PKB',skala:'1:100'}
+};
+
+// Katalog dikalibrasi dari ukuran nyata Cibinong. "add" = tambahan hasil analisa regulasi.
+function katalog(p){
+  const L=[],add=1;
+  L.push({id:'gp',   nama:'R. GP (AMERICA)',      luas:10.5, dim:3.00, z:'klinis',   lt:1, ch:3.00, ref:'Cibinong 3,00 × 3,50'});
+  L.push({id:'play', nama:'PLAY HOSPITAL',        luas:12.4, dim:2.90, z:'publik',   lt:1, ch:3.00, ref:'Cibinong 2,90 × 4,27'});
+  if(p.myo) L.push({id:'myo',nama:'AREA MYOBRACE / ORTHOWALL',luas:8, dim:2.50,z:'klinis',lt:1,ch:3.00,ref:'Kalimalang'});
+  L.push({id:'mush', nama:'MUSHOLA & NURSERY',    luas:9.03, dim:2.85, z:'penunjang',lt:1, ch:3.00, ref:'Cibinong 2,85 × 3,17'});
+  L.push({id:'farm', nama:'R. FARMASI & BMHP',    luas:6,    dim:2.00, z:'penunjang',lt:1, ch:3.00, ref:'PMK 14/2021', add});
+  L.push({id:'srv',  nama:'R. SERVER & PANEL',    luas:4.21, dim:1.65, z:'servis',   lt:0, ch:3.00, ref:'Cibinong 1,65 × 2,55'});
+  if(p.bedah) L.push({id:'bedah',nama:'R. TINDAKAN / BEDAH MULUT',luas:16,dim:3.00,z:'klinis',lt:0,ch:3.00,ref:'PMK 14/2021 Klinik Utama',add});
+  if(p.rtg==='intra') L.push({id:'rtg',nama:'R. RONTGEN',luas:6.81,dim:2.27,z:'klinis',lt:0,ch:2.85,ref:'Cibinong 2,27 × 3,00'});
+  if(p.rtg==='pano')  L.push({id:'rtg',nama:'R. RONTGEN PANORAMIK / CBCT',luas:9,dim:3.00,z:'klinis',lt:0,ch:2.85,ref:'BAPETEN 4/2020'});
+  for(let i=1;i<=p.du;i++) L.push({id:'du'+i,nama:'R. DENTAL '+i+' ('+NEGARA[i%NEGARA.length]+')',luas:12,dim:3.00,z:'klinis',lt:0,ch:2.85,ref:'Cibinong 3,00 × 4,00'});
+  L.push({id:'nurse',nama:'NURSE STATION',        luas:4,    dim:1.50, z:'klinis',   lt:0, ch:3.00, ref:'Standar Medikids'});
+  L.push({id:'ster', nama:'R. STERIL',            luas:4.41, dim:1.75, z:'klinis',   lt:0, ch:2.85, ref:'Cibinong 1,75 × 2,52'});
+  L.push({id:'spoel',nama:'SPOELHOEK / CUCI ALAT',luas:2,    dim:1.20, z:'klinis',   lt:0, ch:2.85, ref:'PMK 7/2019', add});
+  L.push({id:'dok',  nama:'R. ISTIRAHAT DOKTER',  luas:6.81, dim:2.27, z:'penunjang',lt:0, ch:3.00, ref:'Cibinong 2,27 × 3,00'});
+  L.push({id:'loker',nama:'R. GANTI & LOKER STAF',luas:4,    dim:1.50, z:'penunjang',lt:0, ch:3.00, ref:'PMK 7/2019', add});
+  L.push({id:'store',nama:'STORAGE MEDIS',        luas:2.25, dim:1.50, z:'penunjang',lt:0, ch:3.00, ref:'Standar Medikids'});
+  L.push({id:'rm',   nama:'R. REKAM MEDIS / ARSIP',luas:3,   dim:1.50, z:'penunjang',lt:0, ch:3.00, ref:'PMK 24/2022', add});
+  L.push({id:'gd',   nama:'GUDANG',               luas:4,    dim:1.50, z:'servis',   lt:0, ch:3.00, ref:'Cibinong (bawah tangga)'});
+  return L;
+}
+const SERVIS_LUAR=[
+ ['R. KOMPRESOR & SUCTION','1,00 × 2,52 m',2.52,'Cibinong','Terpisah dari ruang klinis — >70 dB. Peredam + ventilasi silang wajib.'],
+ ['TPS LIMBAH B3','2,27 × 1,00 m',2.27,'Cibinong','Lantai kedap + tanggul, atap, berkunci, simbol B3, akses non-publik.'],
+ ['BAK IPAL','sesuai lembar IPAL',0,'Cibinong','Bak jerigen + biofilter. Efluen wajib penuhi PermenLHK 68/2016.'],
+ ['R. GENSET','2,00 × 2,50 m',5,'Standar','Cerobong ke atas, jarak ≥3 m dari bukaan ruang perawatan.'],
+ ['PANEL & METERAN','0,80 × 1,20 m',0.96,'Cibinong','Panel 1/2/3 seperti Kalimalang. Bebas area basah.']
+];
+
+let P={},FLOORS=[],WARN=[],curFloor=1,sisi='kiri';
+const g=id=>document.getElementById(id), num=id=>parseFloat(g(id).value)||0;
+
+function read(){P={Wg:num('in-w'),D:num('in-d'),t:num('in-t'),N:+g('in-n').value,h1:num('in-h1'),h2:num('in-h2'),
+ du:Math.round(num('in-du')),kursi:Math.round(num('in-kursi')),kor:num('in-kor'),lift:g('in-lift').value==='1',
+ rtg:g('in-rtg').value,bedah:g('in-bedah').value==='1',myo:g('in-myo').value==='1',sisi,
+ cab:g('in-cab').value,skala:g('in-skala').value,lembar:g('in-lembar').value};
+ P.W=+(P.Wg-2*P.t).toFixed(2); P.H=f=>f===1?P.h1:P.h2;}
+
+function build(){
+  read();WARN=[];FLOORS=[];
+  const {W,D,N,kor}=P, bandW=+(W-kor).toFixed(2), pool=katalog(P);
+  const luasTunggu=Math.max(9,P.kursi*0.9);
+  const frontD=+Math.max(3.0,(12.81+luasTunggu)/W).toFixed(2);
+  const coreW=P.lift?Math.min(W*0.75,4.6):Math.min(2.4,W*0.6);
+
+  if(kor<1.2)WARN.push(['bad','Koridor '+kor.toFixed(2)+' m di bawah 1,20 m. Catatan: DWG Cibinong sendiri memakai 1,27 m — standar tertulis "lorong 90–100 cm" perlu direvisi mengikuti gambar.']);
+  if(bandW<2.6)WARN.push(['bad','Lebar bersih ruang '+bandW.toFixed(2)+' m, di bawah clearance dental unit 2,60 m.']);
+  else if(bandW<2.9)WARN.push(['warn','Lebar bersih '+bandW.toFixed(2)+' m — R. Dental tetap 12 m² tapi memanjang. Cibinong memakai 3,00 m; posisikan DU membujur, sink di dinding belakang.']);
+  if(P.Wg-2*P.t<3.9)WARN.push(['bad','Lebar bersih total '+W.toFixed(2)+' m. Benchmark Cibinong 4,27 m adalah batas praktis terkecil untuk 1 koridor + 1 baris ruang.']);
+
+  const sisa=[...pool];
+  for(let f=1;f<=N;f++){
+    const rooms=[];let y=0;const rearD=P.lift?3.2:2.8;
+    if(f===1){rooms.push({x:0,y:0,w:W,d:frontD,nama:'RESEPSIONIS + AREA TUNGGU',z:'publik',ch:3.00,pintu:'depan',ref:'Cibinong 4,27 × 3,00'});y=frontD;}
+    const availD=+(D-y-rearD).toFixed(2);
+    if(availD<2.0){WARN.push(['bad','Lantai '+f+': sisa kedalaman '+availD.toFixed(2)+' m setelah zona depan & inti tangga. Perpanjang ruko atau kurangi program.']);FLOORS.push({f,rooms,availD:0});continue;}
+    const korX=sisi==='kiri'?0:bandW, roomX=sisi==='kiri'?kor:0;
+    rooms.push({x:korX,y,w:kor,d:availD,nama:'KORIDOR',z:'sirkulasi',kor:1,ch:3.00});
+    let cy=y,used=0;
+    for(let i=0;i<sisa.length;i++){const r=sisa[i];
+      if(r.lt&&r.lt!==f)continue;
+      let d=Math.ceil(Math.max(r.dim,r.luas/bandW)*20)/20;
+      if(used+d>availD+.001)continue;
+      rooms.push({x:roomX,y:cy,w:bandW,d,nama:r.nama,z:r.z,ch:r.ch,ref:r.ref,add:r.add,pintu:sisi});
+      cy+=d;used+=d;sisa.splice(i,1);i--;}
+    if(availD-used>.35)rooms.push({x:roomX,y:cy,w:bandW,d:+(availD-used).toFixed(2),nama:'CADANGAN / VOID',z:'sirkulasi',ch:3.00});
+    let cW=coreW; if(f===1&&W-cW<2.0)cW=Math.max(1.0,W-2.0);
+    const cX=sisi==='kiri'?0:W-cW;
+    if(P.lift){const lw=cW*0.45;
+      rooms.push({x:cX,y:D-rearD,w:lw,d:rearD,nama:'LIFT',z:'sirkulasi',lift:1,ch:3.00,ref:'Kalimalang 8,1 m²'});
+      rooms.push({x:cX+lw,y:D-rearD,w:cW-lw,d:rearD,nama:'AREA TANGGA',z:'sirkulasi',tangga:1,ch:3.00});
+    } else rooms.push({x:cX,y:D-rearD,w:cW,d:rearD,nama:'AREA TANGGA',z:'sirkulasi',tangga:1,ch:3.00});
+    const wX=sisi==='kiri'?cW:0, wW=+(W-cW).toFixed(2);
+    rooms.push({x:wX,y:D-rearD,w:wW,d:rearD,z:'servis',ch:3.00,
+      nama:f===1?'TOILET DIFABEL + TOILET':'TOILET STAF + JANITOR',ff:f===1?'FF −0,05':'FF −0,05'});
+    if(f===1&&wW<2.0)WARN.push(['warn','Toilet difabel butuh ruang bebas 2,00 × 2,20 m (Permen PUPR 14/2017); tersedia '+wW.toFixed(2)+' m. Geser inti tangga atau letakkan toilet difabel dekat FO.']);
+    FLOORS.push({f,rooms,availD});
+  }
+  if(sisa.length){const need=sisa.reduce((a,b)=>a+b.luas,0);
+    WARN.push(['warn','Belum tertampung: '+sisa.map(s=>s.nama).join(', ')+'. Butuh ± '+need.toFixed(1)+' m².']);}
+  if(!WARN.length)WARN.push(['ok','Seluruh program ruang wajib tertampung dan memenuhi dimensi minimum benchmark Cibinong.']);
+  g('hintKor').textContent=kor>=1.2?'Memenuhi jalur kursi roda. Benchmark Cibinong = 1,27 m.':'Di bawah standar aksesibilitas.';
+  g('kopMeta').innerHTML=P.cab+' &middot; '+P.Wg.toFixed(2)+' × '+P.D.toFixed(2)+' m (bersih '+P.W.toFixed(2)+') &middot; '+P.N+' lt &middot; '+(P.Wg*P.D*P.N).toFixed(1)+' m² &middot; '+P.skala+' &middot; '+P.lembar;
+  curFloor=Math.min(curFloor,N);
+  drawFloorbar();drawPlan();drawProg();drawBench();drawStd();drawCek();drawMep();notes();build3D();
+}
+function notes(){g('notes').innerHTML=WARN.map(([k,t])=>'<div class="note '+k+'"><b>'+({ok:'Sesuai',warn:'Periksa',bad:'Koreksi'}[k])+'</b><span>'+t+'</span></div>').join('')}
+function drawFloorbar(){const b=g('floorbar');
+  b.innerHTML=FLOORS.map(f=>'<button data-f="'+f.f+'" aria-pressed="'+(f.f===curFloor)+'">Lantai '+f.f+'</button>').join('');
+  b.querySelectorAll('button').forEach(x=>x.onclick=()=>{curFloor=+x.dataset.f;drawFloorbar();drawPlan()})}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function drawPlan(){
+  const F=FLOORS.find(f=>f.f===curFloor);if(!F)return;
+  const {W,D,t}=P,M=100,S=Math.min((1050-2*M)/(W+2*t),(720-2*M)/(D+2*t)),ox=(1050-W*S)/2,oy=52;
+  const X=v=>ox+v*S,Y=v=>oy+v*S;let s='';
+  F.rooms.forEach(r=>{
+    s+='<rect x="'+X(r.x)+'" y="'+Y(r.y)+'" width="'+r.w*S+'" height="'+r.d*S+'" fill="'+ZONA[r.z]+'" stroke="#12222A" stroke-width="1.6"/>';
+    if(r.kor)for(let k=0;k<r.d*S;k+=9)s+='<line x1="'+X(r.x)+'" y1="'+(Y(r.y)+k)+'" x2="'+(X(r.x)+r.w*S)+'" y2="'+(Y(r.y)+k-r.w*S)+'" stroke="#C9D3D5" stroke-width=".7"/>';
+    if(r.tangga){const n=Math.max(3,Math.round(r.d/0.28));
+      for(let k=1;k<n;k++){const yy=Y(r.y)+k*(r.d*S/n);s+='<line x1="'+X(r.x)+'" y1="'+yy+'" x2="'+(X(r.x)+r.w*S)+'" y2="'+yy+'" stroke="#8FA0A5" stroke-width=".8"/>';}
+      s+='<line x1="'+(X(r.x)+r.w*S/2)+'" y1="'+(Y(r.y)+r.d*S-6)+'" x2="'+(X(r.x)+r.w*S/2)+'" y2="'+(Y(r.y)+8)+'" stroke="#12222A" stroke-width="1.2" marker-end="url(#ar)"/>';
+      s+='<text x="'+(X(r.x)+r.w*S/2)+'" y="'+(Y(r.y)+r.d*S-9)+'" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#12222A">NAIK</text>';}
+    if(r.lift)s+='<line x1="'+X(r.x)+'" y1="'+Y(r.y)+'" x2="'+(X(r.x)+r.w*S)+'" y2="'+(Y(r.y)+r.d*S)+'" stroke="#8FA0A5" stroke-width=".8"/><line x1="'+(X(r.x)+r.w*S)+'" y1="'+Y(r.y)+'" x2="'+X(r.x)+'" y2="'+(Y(r.y)+r.d*S)+'" stroke="#8FA0A5" stroke-width=".8"/>';
+    const cx=X(r.x)+r.w*S/2,cy=Y(r.y)+r.d*S/2,big=r.d*S>34;
+    if(big){
+      s+='<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-family="IBM Plex Sans Condensed" font-size="11" font-weight="600" fill="#12222A">'+esc(r.nama)+'</text>';
+      s+='<text x="'+cx+'" y="'+(cy+7)+'" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5C6E76">'+r.w.toFixed(2)+' M × '+r.d.toFixed(2)+' M = '+(r.w*r.d).toFixed(2)+' m²</text>';
+      if(r.ch)s+='<text x="'+cx+'" y="'+(cy+19)+'" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#8FA0A5">CH. +'+r.ch.toFixed(2)+'</text>';
+    }else s+='<text x="'+cx+'" y="'+(cy+3)+'" text-anchor="middle" font-family="IBM Plex Sans Condensed" font-size="9.5" fill="#12222A">'+esc(r.nama)+' · '+(r.w*r.d).toFixed(1)+' m²</text>';
+    if(r.pintu===sisi){const px=sisi==='kiri'?X(r.x):X(r.x)+r.w*S,dir=sisi==='kiri'?1:-1,py=Y(r.y)+r.d*S/2,dw=0.9*S;
+      s+='<path d="M '+px+' '+(py-dw/2)+' a '+dw+' '+dw+' 0 0 '+(sisi==='kiri'?1:0)+' '+(dir*dw)+' '+dw+'" fill="none" stroke="#8FA0A5" stroke-width=".9"/>';
+      s+='<line x1="'+px+'" y1="'+(py-dw/2)+'" x2="'+px+'" y2="'+(py+dw/2)+'" stroke="'+ZONA[r.z]+'" stroke-width="3"/>';}
+  });
+  // dinding + kolom
+  s+='<rect x="'+(X(0)-t*S)+'" y="'+(Y(0)-t*S)+'" width="'+((W+2*t)*S)+'" height="'+((D+2*t)*S)+'" fill="none" stroke="#12222A" stroke-width="1"/>';
+  s+='<rect x="'+X(0)+'" y="'+Y(0)+'" width="'+W*S+'" height="'+D*S+'" fill="none" stroke="#12222A" stroke-width="4"/>';
+  [[0,0],[W,0],[0,D],[W,D],[0,D/2],[W,D/2]].forEach(([a,b])=>{const k=0.25*S;
+    s+='<rect x="'+(X(a)-k/2)+'" y="'+(Y(b)-k/2)+'" width="'+k+'" height="'+k+'" fill="#12222A"/>';});
+  s+='<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(W)+'" y2="'+Y(0)+'" stroke="#C8102E" stroke-width="5"/>';
+  s+='<text x="'+X(W/2)+'" y="'+(Y(0)-12)+'" text-anchor="middle" font-family="IBM Plex Sans Condensed" font-size="10" letter-spacing="2.2" fill="#C8102E">FASADE ACP MERAH-PUTIH + NEONBOX — JALAN</text>';
+  // dimensi rantai
+  const dx=Y(D)+38;let acc=0;
+  s+=tick(X(0),dx,X(W),dx,(W*1000).toFixed(0),0);
+  const chain=F.rooms.filter(r=>r.w===+(W-P.kor).toFixed(2)||r.w===W).sort((a,b)=>a.y-b.y);
+  chain.forEach(r=>{s+=tick(X(W)+38,Y(r.y),X(W)+38,Y(r.y+r.d),(r.d*1000).toFixed(0),1)});
+  s+=tick(X(0)-40,Y(0),X(0)-40,Y(D),(D*1000).toFixed(0),1);
+  // kop
+  const kw=262,kh=98,kx=1050-kw-14,ky=720-kh-14;
+  s+='<rect x="'+kx+'" y="'+ky+'" width="'+kw+'" height="'+kh+'" fill="#F5F7F7" stroke="#12222A" stroke-width="1.5"/>';
+  s+='<rect x="'+kx+'" y="'+ky+'" width="7" height="'+kh+'" fill="#C8102E"/>';
+  [['PROYEK','KLINIK UTAMA GIGI MEDIKIDS'],['CABANG',P.cab],['JUDUL','LAYOUT PLAN LT. '+curFloor],
+   ['SKALA',P.skala],['LUAS LT.',(P.Wg*P.D).toFixed(2)+' m²'],['FF','+'+(curFloor===1?'0.00':(P.h1+(curFloor-2)*P.h2).toFixed(2))],
+   ['NO.',P.lembar.replace(/\d+$/,'')+curFloor]].forEach((r,i)=>{const yy=ky+15+i*12;
+    s+='<text x="'+(kx+15)+'" y="'+yy+'" font-family="IBM Plex Mono" font-size="7.5" fill="#5C6E76" letter-spacing="1">'+r[0]+'</text>';
+    s+='<text x="'+(kx+84)+'" y="'+yy+'" font-family="IBM Plex Sans Condensed" font-size="9.5" font-weight="600" fill="#12222A">'+esc(r[1])+'</text>';});
+  s+='<g transform="translate(48,56)"><circle r="17" fill="none" stroke="#12222A" stroke-width="1"/><path d="M0,-14 L5,7 L0,3 L-5,7 Z" fill="#12222A"/><text y="-21" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#12222A">U</text></g>';
+  g('plan').innerHTML='<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7Z" fill="#12222A"/></marker></defs>'+s;
+}
+function tick(x1,y1,x2,y2,label,vert){
+  let s='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#12222A" stroke-width=".9"/>';
+  [[x1,y1],[x2,y2]].forEach(([x,y])=>{s+='<line x1="'+(x-4.5)+'" y1="'+(y-4.5)+'" x2="'+(x+4.5)+'" y2="'+(y+4.5)+'" stroke="#12222A" stroke-width="1.2"/>'});
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  s+='<text x="'+mx+'" y="'+(my-5)+'" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="#12222A"'+(vert?' transform="rotate(-90 '+mx+' '+my+')"':'')+'>'+label+'</text>';
+  return s;
+}
+
+function drawProg(){
+  let rows='',tot=0;
+  FLOORS.forEach(F=>{let ft=0;
+    rows+='<tr class="grp"><td colspan="6">Lantai '+F.f+' &nbsp;·&nbsp; FF +'+(F.f===1?'0.00':(P.h1+(F.f-2)*P.h2).toFixed(2))+'</td></tr>';
+    F.rooms.forEach(r=>{const a=r.w*r.d;ft+=a;tot+=a;
+      rows+='<tr><td>'+esc(r.nama)+(r.add?' <span class="tag add">tambahan</span>':'')+'</td><td class="num">'+r.w.toFixed(2)+' × '+r.d.toFixed(2)+'</td><td class="num">'+a.toFixed(2)+'</td><td class="num">'+(r.ch?'+'+r.ch.toFixed(2):'—')+'</td><td><span class="chip" style="background:'+ZONA[r.z]+'"></span>'+r.z+'</td><td>'+(r.ref||'—')+'</td></tr>';});
+    rows+='<tr><td></td><td class="num">subtotal</td><td class="num"><b>'+ft.toFixed(2)+'</b></td><td colspan="3"></td></tr>';});
+  const sl=SERVIS_LUAR.map(x=>'<tr><td>'+x[0]+'</td><td class="num">'+x[1]+'</td><td class="num">'+(x[2]||'—')+'</td><td class="num">—</td><td>servis</td><td>'+x[3]+' — '+x[4]+'</td></tr>').join('');
+  g('progTbl').innerHTML='<table><tr><th>Ruang</th><th style="text-align:right">Dimensi (m)</th><th style="text-align:right">m²</th><th style="text-align:right">CH</th><th>Zona</th><th>Acuan / sumber ukuran</th></tr>'+rows+
+   '<tr class="grp"><td colspan="6">Area servis di luar massa utama (dak belakang / rooftop)</td></tr>'+sl+
+   '<tr><td><b>Total terbangun</b></td><td></td><td class="num"><b>'+tot.toFixed(2)+'</b></td><td colspan="3"></td></tr></table>'+
+   '<p class="hint" style="margin-top:12px">Luas nett as-partisi. Dinding luar '+(P.t*100).toFixed(1)+' cm sudah dikurangkan dari lebar as-as.</p>';
+}
+
+const BENCH=[
+ ['Lebar bersih ruko','4,27 m','≈ 6,8 m (2 modul)','"mengikuti lebar ruko 4 m"','Tulis 4,27 m sebagai lebar bersih acuan — bukan 4,00 m as-as.'],
+ ['Lebar koridor','1,27 m','1,40 m','90–100 cm','<b>Revisi standar tertulis.</b> Gambar sendiri sudah 1,27 m; 90 cm tidak lolos aksesibilitas.'],
+ ['R. Dental','3,00 × 4,00 = 12,00 m²','—','3 × 4 = 12 m²','Cocok. Kunci sebagai modul baku.'],
+ ['R. Dental ujung','2,75 × 4,27 = 11,74 m²','—','—','Toleransi −2% dapat diterima di ruang ujung; catat di SOP.'],
+ ['R. GP (America)','3,00 × 3,50 = 10,50 m²','ada','3 × 4 = 12 m²','Realisasi 10,5 m². Turunkan standar ke 10,5 m² atau perbaiki di proyek baru.'],
+ ['Play Hospital','2,90 × 4,27 = 12,38 m²','ada','2,8 × 2,5 = 7 m²','<b>Standar tertulis jauh di bawah realisasi.</b> Naikkan ke ±12 m².'],
+ ['Resepsionis / FO','4,27 × 3,00 = 12,81 m²','ada','3 × 4 = 12 m²','Cocok.'],
+ ['R. Rontgen','2,27 × 3,00 = 6,81 m²','—','3 × 2 = 6 m²','Cocok. Tambahkan spek 2 mm Pb di keterangan gambar.'],
+ ['R. Steril','1,75 × 2,52 = 4,41 m²','—','1,5 × 2,5 = 3,75 m²','Realisasi lebih besar. Pakai 4,41 m² agar alur kotor→bersih muat.'],
+ ['Mushola & Nursery','2,85 × 3,17 = 9,03 m² (gabung)','—','terpisah, 4 m²','Cibinong menggabung. Putuskan mana yang jadi standar.'],
+ ['R. Kompresor','1,00 × 2,52 = 2,52 m²','—','1,2 × 2 = 2,4 m²','Cocok.'],
+ ['TPS','2,27 × 1,00 = 2,27 m²','—','1,5 × 1,5 = 2,25 m²','Cocok.'],
+ ['R. Server','1,65 × 2,55 = 4,21 m²','panel 1/2/3','tidak ada','<b>Belum masuk standar tertulis.</b> Tambahkan.'],
+ ['Tinggi antarlantai','L1 ±0,00 / L2 +4,25 / L3 +8,00','—','tidak diatur','FtF 4,25 m lalu 3,75 m. Masukkan ke standar.'],
+ ['Ceiling height','Publik +3,00 / Dental +2,85','+3,00 seluruhnya','tidak diatur','Bedakan CH publik vs klinis; ruang dental turun untuk jalur ducting & suction.'],
+ ['Level toilet','FF −0,05','—','tidak diatur','Toilet turun 5 cm. Gudang naik +0,20.'],
+ ['Skala gambar','1:60','1:50','tidak diatur','<b>Pilih satu.</b> Rekomendasi 1:50 untuk denah A3, 1:20 untuk detail.'],
+ ['Sirkulasi vertikal','tangga saja','tangga + lift 8,1 m²','tidak diatur','Tentukan ambang: ≥3 lantai atau ≥X m² wajib lift.']
+];
+function drawBench(){
+  g('benchTbl').innerHTML='<table><tr><th>Parameter</th><th>Cibinong (DWG)</th><th>Kalimalang (PDF)</th><th>Standar tertulis</th><th>Rekomendasi</th></tr>'+
+   BENCH.map(b=>'<tr><td><b>'+b[0]+'</b></td><td class="mono" style="font-size:11.5px">'+b[1]+'</td><td class="mono" style="font-size:11.5px">'+b[2]+'</td><td class="mono" style="font-size:11.5px">'+b[3]+'</td><td>'+b[4]+'</td></tr>').join('')+'</table>'+
+   '<p class="hint" style="margin-top:12px">Nilai Cibinong dibaca langsung dari entitas DIMENSION dan MTEXT di dalam file DWG. Nilai Kalimalang dari anotasi PDF — sebagian ruang tidak berlabel ukuran sehingga ditandai “—”.</p>';
+}
+
+const SHEETSET=[
+ ['LE.1–LE.3','Layout Existing Lt. 1–3','Kondisi as-built sebelum fitout'],
+ ['LP.1–LP.3','Layout Plan Lt. 1–3','Denah rencana + nama & ukuran ruang + CH'],
+ ['CP.1–CP.3','Ceiling Plan Lt. 1–3','Drop ceiling, downlight 5", spotlight 3", indirect, LED hidden'],
+ ['OL.1–OL.3','Layout Stop Kontak, LAN & Telp','Notasi FF +250 / +950 mm, jumlah SK, LAN, telp'],
+ ['AC.1–AC.3','Layout AC Lt. 1–3','Kapasitas ½ / ¾ / 1 / 2 PK, FF +2.60, posisi outdoor'],
+ ['CCTV.1–CCTV.3','Layout CCTV Lt. 1–3','Titik kamera + arah pandang'],
+ ['SS.1–SS.3','Layout Instalasi Speaker','Ceiling speaker, volume control'],
+ ['IPAL','Denah & Potongan Bak IPAL','Skala 1:20'],
+ ['FS.1','Fasade & Signage','ACP, neonbox, lampu sorot, tampak depan + 3D'],
+ ['FR.xx','Detail Furniture per Elevasi A/B/C/D','Reception, bench, cabinet, gate, panel poster, orthowall'],
+ ['SD.1','Layout Sprinkler & Smoke Detector','<span class="tag add">tambahkan</span> Sudah ada di Kalimalang, belum di Cibinong'],
+ ['PL.1','Layout Plumbing & Sanitasi','<span class="tag add">tambahkan</span> Air bersih, air kotor, suction, kompresor'],
+ ['EV.1','Denah Jalur Evakuasi & APAR','<span class="tag add">tambahkan</span> Wajib untuk ruko ≥3 lantai'],
+ ['LD.1','Layout Lantai / Pola Keramik','<span class="tag add">tambahkan</span> Cegah potongan sisa di lapangan']
+];
+const LAYERSTD=[
+ ['Dinding','Dinding struktural & bata','warna 8 · tebal 0,30 mm'],
+ ['Kolom','Kolom eksisting (hatch solid)','warna 8'],
+ ['Partisi','Partisi gypsum / non-struktural','warna 5 (biru)'],
+ ['Pintu dan jendela','Kusen, daun pintu, arah bukaan','warna 3'],
+ ['FURNITURE','Perabot, dental unit, kabinet','warna 9'],
+ ['DIMENSI','Garis & teks dimensi','warna 4'],
+ ['Teks 1','Nama ruang, ukuran, notasi CH','warna 7'],
+ ['Elektrikal','Titik lampu, SK, LAN, AC, CCTV, speaker','warna 1'],
+ ['KOP 0|Kop','Kop gambar (nested layer group)','warna 7 · non-plot untuk sub-layer bantu']
+];
+const MATERIAL=[
+ ['HPL Taco TH 884 RE','Merah Medikids','Box up, kolom bungkus, reception'],
+ ['HPL Taco TH 111 A','Kayu muda','Kabinet, ambalan, meja'],
+ ['Cat Duco Merah','Aksen utama','Body furniture, gate, signage'],
+ ['Cat Duco Putih','Netral','Body, ambalan'],
+ ['Cat Duco Biru / Kuning / Hijau','Aksen tematik','Playhospital, area anak'],
+ ['Wallpaper Bata Merah','Tekstur','Dinding area tunggu / playhospital'],
+ ['Acrylic Bening 6 mm','Transparan','Jendela intip, display'],
+ ['ACP + Neonbox','Fasade','Papan nama, lampu sorot']
+];
+function drawStd(){
+  g('stdTbl').innerHTML=
+  '<table><tr><th>Kode</th><th>Lembar</th><th>Isi</th></tr>'+SHEETSET.map(x=>'<tr><td class="mono">'+x[0]+'</td><td><b>'+x[1]+'</b></td><td>'+x[2]+'</td></tr>').join('')+'</table>'+
+  '<p class="hint" style="margin:10px 0 20px">21 lembar pertama diambil persis dari tab layout DWG Cibinong. Empat lembar bertanda merah adalah usulan tambahan agar set gambar lengkap untuk perizinan &amp; tender.</p>'+
+  '<table><tr><th>Layer</th><th>Isi</th><th>Ketentuan</th></tr>'+LAYERSTD.map(x=>'<tr><td class="mono">'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>').join('')+'</table>'+
+  '<p class="hint" style="margin:10px 0 20px">Layer di atas sudah dipakai di Cibinong. Yang perlu dibersihkan: layer sampah bawaan blok unduhan (<span class="mono">dwgmodels.com</span>, <span class="mono">cad-block.com</span>, <span class="mono">KJSKLJDAKDJ</span>, <span class="mono">Layer2</span>, <span class="mono">RND</span>, <span class="mono">inst</span>) dan 345 blok anonim <span class="mono">A$C…</span>. Jalankan PURGE + LAYDEL sebelum file diserahkan.</p>'+
+  '<table><tr><th>Material</th><th>Kode / warna</th><th>Penggunaan</th></tr>'+MATERIAL.map(x=>'<tr><td><b>'+x[0]+'</b></td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>').join('')+'</table>'+
+  '<p class="hint" style="margin-top:10px">Diambil dari anotasi gambar detail Kalimalang. Jadikan lembar “Material Board” tetap di setiap set gambar agar vendor tidak salah beli.</p>';
+}
+
+const CEK=[
+ ['R. Tindakan','Klinik Utama wajib punya ruang tindakan terpisah. Tidak ditemukan di Cibinong maupun Kalimalang.','PMK 14/2021','bad'],
+ ['R. Farmasi','Ruang/lemari obat & BMHP terkunci dengan pencatatan suhu. Tidak ada di kedua gambar.','PMK 14/2021','bad'],
+ ['Toilet difabel','Min. 1 unit, ruang bebas 2,00 × 2,20 m, grab bar. Cibinong hanya "TOILET"; Kalimalang WC 3,2 m².','Permen PUPR 14/2017','bad'],
+ ['Koridor','Min. 1,20 m. Gambar sudah 1,27–1,40 m — <b>standar tertulis 90–100 cm yang salah</b>.','Permen PUPR 14/2017','warn'],
+ ['Spoelhoek','Zona kotor terpisah sebelum sterilisasi. Belum ada.','PMK 27/2017 PPI','bad'],
+ ['Proteksi kebakaran','Kalimalang sudah punya lembar sprinkler + smoke detector; Cibinong belum. Ruko 3 lantai wajib APAR, detektor, lampu darurat, sign exit.','PMK 24/2016','bad'],
+ ['Jalur evakuasi','Tangga tunggal pada 3 lantai perlu justifikasi. Cibinong menutup area bawah tangga jadi gudang — periksa beban api.','Permen PU 26/2008','warn'],
+ ['Rontgen','Perlu dinding setara 2 mm Pb, pintu Pb, lampu tanda, izin BAPETEN, Petugas Proteksi Radiasi. Belum tertulis di gambar.','Perka BAPETEN 4/2020','warn'],
+ ['Limbah B3','TPS 2,27 m² sudah ada di Cibinong. Lengkapi lantai kedap + tanggul, simbol, logbook manifest.','PermenLHK P.56/2015','warn'],
+ ['IPAL','Lembar IPAL sudah ada. Lengkapi Persetujuan Teknis / SPPL dan uji efluen berkala.','PermenLHK 68/2016','warn'],
+ ['Cuci tangan','Wastafel di tiap ruang tindakan + handrub koridor tiap 8–10 m. Belum dinotasikan.','PMK 27/2017 PPI','warn'],
+ ['Ventilasi','Min. 6 ACH di ruang tindakan; tindakan gigi menghasilkan aerosol. Exhaust fan sudah ada di legenda Cibinong — perbanyak.','PMK 7/2019','warn'],
+ ['Pencahayaan','R. Dental 500–1.000 lux di bidang kerja. Legenda hanya downlight & spotlight — tambahkan task light dental.','SNI 6197','warn'],
+ ['Rekam medis','RME wajib. Jika masih fisik, sediakan ruang arsip terkunci.','PMK 24/2022','warn'],
+ ['R. Laktasi','Cibinong menggabung Mushola & Nursery 9,03 m². Sah selama ada sekat & privasi.','PP 33/2012','ok']
+];
+function drawCek(){
+  const col={ok:'var(--ok)',warn:'var(--warn)',bad:'var(--bad)'},lbl={ok:'Sudah',warn:'Lengkapi',bad:'Belum ada'};
+  g('cekTbl').innerHTML='<table><tr><th>Aspek</th><th>Temuan pada gambar referensi</th><th>Acuan</th><th>Status</th></tr>'+
+   CEK.map(c=>'<tr><td><b>'+c[0]+'</b></td><td>'+c[1]+'</td><td class="mono" style="font-size:11px">'+c[2]+'</td><td><span class="tag" style="border-color:'+col[c[3]]+';color:'+col[c[3]]+'">'+lbl[c[3]]+'</span></td></tr>').join('')+'</table>'+
+   '<p class="hint" style="margin-top:12px">Acuan nasional. Dinkes kabupaten/kota kerap menambah syarat lokal (parkir, jarak antarklinik, PBG/SLF). Verifikasi ke Dinkes setempat dan cek apakah ada revisi regulasi terbaru sebelum layout dikunci.</p>';
+}
+
+function drawMep(){
+  const luas=P.Wg*P.D*P.N;
+  const items=[['Dental unit + light cure',P.du,1200],['Kompresor bebas minyak',Math.ceil(P.du/3),2200],
+   ['Suction sentral',Math.ceil(P.du/4),1100],['Autoclave / sterilisator',1,2000],
+   ['Rontgen dental',P.rtg==='none'?0:1,P.rtg==='pano'?3000:1500],
+   ['AC ¾ PK (ruang dental & GP)',P.du+2,660],['AC 1–2 PK (publik & tunggu)',3,1400],
+   ['Penerangan & stop kontak (25 W/m²)',1,Math.round(luas*25)],
+   ['FO, IT, CCTV, speaker, signage',1,1400],['Pompa air & water heater',1,1500],
+   ['Lift penumpang',P.lift?1:0,5500]];
+  let tot=0;const rows=items.filter(i=>i[1]>0).map(([n,q,w])=>{const t=q*w;tot+=t;
+    return '<tr><td>'+n+'</td><td class="num">'+q+'</td><td class="num">'+w.toLocaleString('id-ID')+'</td><td class="num">'+t.toLocaleString('id-ID')+'</td></tr>'}).join('');
+  const beban=Math.round(tot*.75),kva=Math.round(beban/.85),cukup=kva<=23000;
+  g('mepTbl').innerHTML='<table><tr><th>Beban</th><th style="text-align:right">Qty</th><th style="text-align:right">W/unit</th><th style="text-align:right">Total W</th></tr>'+rows+
+   '<tr><td colspan="3" class="num">Beban tersambung</td><td class="num"><b>'+tot.toLocaleString('id-ID')+' W</b></td></tr>'+
+   '<tr><td colspan="3" class="num">Faktor keserempakan 0,75</td><td class="num">'+beban.toLocaleString('id-ID')+' W</td></tr>'+
+   '<tr><td colspan="3" class="num">Kebutuhan daya (pf 0,85)</td><td class="num"><b>± '+kva.toLocaleString('id-ID')+' VA</b></td></tr></table>'+
+   '<div class="note '+(cukup?'ok':'bad')+'" style="margin-top:12px"><b>'+(cukup?'Cukup':'Kurang')+'</b><span>Rencana 23.000 VA '+
+   (cukup?'masih memadai (sisa ± '+(23000-kva).toLocaleString('id-ID')+' VA).':'tidak memadai — perkiraan ± '+kva.toLocaleString('id-ID')+' VA. Naikkan ke tingkat berikutnya atau pisah 2 sambungan.')+
+   ' Genset minimal 80% nilai ini agar dental unit, suction, lift, dan penerangan darurat tetap hidup.</span></div>'+
+   '<p class="hint" style="margin-top:10px">Notasi ketinggian stop kontak mengikuti Cibinong: FF +250 mm (umum), FF +950 mm (meja/counter), FF +2.600 mm (indoor AC). Estimasi teknis — bukan perhitungan konsultan MEP; verifikasi ke instalatir bersertifikat sebelum ajukan naik daya.</p>';
+}
+
+/* 3D */
+let R,SC,CAM,rot={x:-0.72,y:0.62},dist=1,explode=false,dinding=true,GRP;
+function init3D(){const el=g('gl');
+  R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));el.appendChild(R.domElement);
+  SC=new THREE.Scene();CAM=new THREE.PerspectiveCamera(38,1,.1,500);
+  SC.add(new THREE.HemisphereLight(0xffffff,0x9fb0b4,1.05));
+  const dl=new THREE.DirectionalLight(0xffffff,.55);dl.position.set(12,22,9);SC.add(dl);
+  let down=false,px=0,py=0;
+  el.addEventListener('pointerdown',e=>{down=true;px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{if(!down)return;rot.y+=(e.clientX-px)*.007;rot.x+=(e.clientY-py)*.006;rot.x=Math.max(-1.45,Math.min(-.05,rot.x));px=e.clientX;py=e.clientY;place()});
+  el.addEventListener('pointerup',()=>down=false);
+  el.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(.45,Math.min(2.4,dist*(1+e.deltaY*.001)));place()},{passive:false});
+  addEventListener('resize',resize);(function loop(){requestAnimationFrame(loop);R.render(SC,CAM)})();}
+function resize(){const el=g('gl'),w=el.clientWidth||840,h=el.clientHeight||520;R.setSize(w,h);CAM.aspect=w/h;CAM.updateProjectionMatrix();place()}
+function topY(){return P.h1+(P.N-1)*P.h2}
+function place(){const rad=Math.max(P.D,P.Wg,topY())*2.05*dist;
+  CAM.position.set(Math.sin(rot.y)*Math.cos(rot.x)*rad,-Math.sin(rot.x)*rad+topY()*.35,Math.cos(rot.y)*Math.cos(rot.x)*rad);
+  CAM.lookAt(0,topY()*.32,0);}
+function box(w,h,d,x,y,z,col,op){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:col,transparent:op<1,opacity:op}));m.position.set(x,y,z);GRP.add(m);return m}
+function build3D(){
+  if(!R)return; if(GRP)SC.remove(GRP);
+  GRP=new THREE.Group();SC.add(GRP);
+  const {W,D,N}=P,cx=-W/2,cz=-D/2,gapU=explode?2.0:0,t=.09;
+  let base=0;
+  FLOORS.forEach(F=>{
+    const ftf=F.f===1?P.h1:P.h2;
+    box(W+.3,.18,D+.3,cx+W/2,base-.09,cz+D/2,0xBFC9CB,1);
+    F.rooms.forEach(r=>{
+      const x0=cx+r.x,z0=cz+r.y,cxr=x0+r.w/2,czr=z0+r.d/2;
+      box(r.w-.04,.05,r.d-.04,cxr,base+.05,czr,ZONA3D[r.z],1);
+      if(!dinding)return;
+      const h=(r.ch||2.85),y=base+h/2,op=r.z==='sirkulasi'?.26:.9;
+      box(r.w,h,t,cxr,y,z0,ZONA3D[r.z],op);box(r.w,h,t,cxr,y,z0+r.d,ZONA3D[r.z],op);
+      box(t,h,r.d,x0,y,czr,ZONA3D[r.z],op);box(t,h,r.d,x0+r.w,y,czr,ZONA3D[r.z],op);
+    });
+    if(dinding){const h=ftf-.2,y=base+h/2;
+      box(W+.15,h,.15,cx+W/2,y,cz-.07,0xE6EAEA,.3);box(W+.15,h,.15,cx+W/2,y,cz+D+.07,0xE6EAEA,.3);
+      box(.15,h,D,cx-.07,y,cz+D/2,0xE6EAEA,.34);box(.15,h,D,cx+W+.07,y,cz+D/2,0xE6EAEA,.34);}
+    // pita fasade merah-putih
+    box(W+.45,.5,.2,cx+W/2,base+ftf-.75,cz-.16,0xC8102E,1);
+    box(W+.45,.14,.22,cx+W/2,base+ftf-.75,cz-.17,0xF7F7F7,1);
+    base+=ftf+gapU;
+  });
+  box(P.W+.45,1.0,.18,cx+W/2,base-(explode?gapU:0)+.35,cz-.16,0xC8102E,1); // parapet + neonbox
+  resize();
+}
+
+/* DXF — memakai nama layer standar Cibinong, satuan milimeter */
+function dxf(){
+  const L=[],p=(c,v)=>{L.push(c);L.push(v)};
+  const layers=[['0',7],[LAY.dinding,8],[LAY.kolom,8],[LAY.partisi,5],[LAY.kusen,3],[LAY.furn,9],[LAY.teks,7],[LAY.dim,4],[LAY.elek,1]];
+  p(0,'SECTION');p(2,'HEADER');p(9,'$INSUNITS');p(70,4);p(9,'$LUNITS');p(70,2);p(0,'ENDSEC');
+  p(0,'SECTION');p(2,'TABLES');p(0,'TABLE');p(2,'LAYER');p(70,layers.length);
+  layers.forEach(([n,c])=>{p(0,'LAYER');p(2,n);p(70,0);p(62,c);p(6,'CONTINUOUS')});
+  p(0,'ENDTAB');p(0,'ENDSEC');p(0,'SECTION');p(2,'ENTITIES');
+  const K=1000;
+  const line=(l,x1,y1,x2,y2)=>{p(0,'LINE');p(8,l);p(10,x1*K);p(20,y1*K);p(30,0);p(11,x2*K);p(21,y2*K);p(31,0)};
+  const text=(l,x,y,h,s)=>{p(0,'TEXT');p(8,l);p(10,x*K);p(20,y*K);p(30,0);p(40,h*K);p(1,s)};
+  const rect=(l,x,y,w,d)=>{line(l,x,y,x+w,y);line(l,x+w,y,x+w,y+d);line(l,x+w,y+d,x,y+d);line(l,x,y+d,x,y)};
+  FLOORS.forEach(F=>{
+    const ox=(F.f-1)*(P.Wg+4),fy=v=>P.D-v;
+    F.rooms.forEach(r=>{
+      rect(LAY.partisi,ox+r.x,fy(r.y+r.d),r.w,r.d);
+      text(LAY.teks,ox+r.x+.12,fy(r.y+r.d)+r.d/2+.10,.15,r.nama);
+      text(LAY.teks,ox+r.x+.12,fy(r.y+r.d)+r.d/2-.15,.12,r.w.toFixed(2)+' M X '+r.d.toFixed(2)+' M');
+      if(r.ch)text(LAY.teks,ox+r.x+.12,fy(r.y+r.d)+r.d/2-.38,.12,'CH. +'+r.ch.toFixed(2));
+      if(r.pintu===sisi){const px=sisi==='kiri'?r.x:r.x+r.w;
+        line(LAY.kusen,ox+px,fy(r.y+r.d/2)-.45,ox+px,fy(r.y+r.d/2)+.45);}
+    });
+    rect(LAY.dinding,ox,0,P.W,P.D);
+    rect(LAY.dinding,ox-P.t,-P.t,P.W+2*P.t,P.D+2*P.t);
+    [[0,0],[P.W,0],[0,P.D],[P.W,P.D],[0,P.D/2],[P.W,P.D/2]].forEach(([a,b])=>rect(LAY.kolom,ox+a-.125,b-.125,.25,.25));
+    text(LAY.teks,ox,P.D+.8,.3,'LAYOUT PLAN LT. '+F.f+' — MEDIKIDS '+P.cab+' — SKALA '+P.skala);
+    line(LAY.dim,ox,-1.0,ox+P.W,-1.0);text(LAY.dim,ox+P.W/2-.35,-.9,.18,(P.W*1000).toFixed(0));
+    line(LAY.dim,ox-1.0,0,ox-1.0,P.D);text(LAY.dim,ox-1.6,P.D/2,.18,(P.D*1000).toFixed(0));
+  });
+  p(0,'ENDSEC');p(0,'EOF');
+  let out='';for(let i=0;i<L.length;i+=2)out+=L[i]+'\n'+L[i+1]+'\n';
+  dl(out,'LP_MEDIKIDS_'+P.cab+'_'+P.Wg.toFixed(2)+'x'+P.D.toFixed(2)+'_'+P.N+'LT.dxf','application/dxf');
+}
+function dl(t,n,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();URL.revokeObjectURL(a.href)}
+
+/* wiring */
+g('in-cab').innerHTML=CABANG.map(c=>'<option'+(c==='CBN'?' selected':'')+'>'+c+'</option>').join('');
+g('in-preset').onchange=e=>{const k=e.target.value;if(k==='cst')return;const v=PRESET[k];
+  g('in-w').value=v.w;g('in-d').value=v.d;g('in-t').value=v.t;g('in-n').value=v.n;g('in-h1').value=v.h1;g('in-h2').value=v.h2;
+  g('in-kor').value=v.kor;g('in-du').value=v.du;g('in-kursi').value=v.kursi;g('in-lift').value=v.lift;g('in-myo').value=v.myo;
+  g('in-cab').value=v.cab;g('in-skala').value=v.skala;build()};
+document.querySelectorAll('.panel input,.panel select').forEach(x=>{if(x.id!=='in-preset')x.addEventListener('input',()=>{g('in-preset').value='cst';build()})});
+document.querySelectorAll('#seg-sisi button').forEach(b=>b.onclick=()=>{sisi=b.dataset.v;document.querySelectorAll('#seg-sisi button').forEach(o=>o.setAttribute('aria-pressed',o===b));build()});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));
+  document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!==b.dataset.t);
+  if(b.dataset.t==='v-3d')setTimeout(resize,30)});
+g('btn-dxf').onclick=dxf;
+g('btn-svg').onclick=()=>dl('<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 720">'+g('plan').innerHTML+'</svg>','LP_'+P.cab+'_LT'+curFloor+'.svg','image/svg+xml');
+g('btn-explode').onclick=e=>{explode=!explode;e.target.setAttribute('aria-pressed',explode);build3D()};
+g('btn-atap').onclick=e=>{dinding=!dinding;e.target.setAttribute('aria-pressed',dinding);build3D()};
+init3D();build();
+</script>
